@@ -18,5 +18,10 @@
                 $this->sendData( 'JOIN', $channel );
             }
         }
+        
+        public function privmsg( $to, $message )
+        {
+            $this->sendData( 'PRIVMSG', $to, $message );
+        }
     }
 ?>

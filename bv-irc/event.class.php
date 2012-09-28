@@ -26,6 +26,16 @@
                     $this->sendData( 'PONG', $data[1] );
                     break;
                 case "PRIVMSG":
+                    $params = $this->getParameters( $this->getRaw() );
+                    
+                    if ( $data[1] != $this->getNick() )
+                    {
+                        $this->runHandler( 'onPublic', $params );
+                    }
+                    else
+                    {
+                        $this->runHandler( 'onMessage', $params );
+                    }
                     // if channel onPublic, if nick onPrivate
                     break;
                 case "JOIN":
@@ -45,24 +55,47 @@
          * running an event handler
          * 
          * @param string $handler the callback to run (if existing)
+         * @param array $parameters
          * 
          * @TODO checking if the methods are callable
          * @TODO maybe adding dynamic handlers? $this->registerHandler( 'event', 'callback' );
          */
-        private function runHandler( $handler )
+        private function runHandler( $handler, $parameters = false )
         {
             if ( method_exists( $this, $handler )  )
             {
-                $this->$handler();
+                if ( $parameters )
+                    $this->$handler( $parameters );
+                else
+                    $this->$handler( );
             }
             elseif ( function_exists( $handler ) )
             {
-                $handler();
+                if ( $parameters )
+                    $handler( $parameters );
+                else
+                    $handler();
             }
             else
             {
                 $this->debug( "! No method found for " . $handler );
             }
+        }
+        
+        /**
+         * format the raw data so it's more usable
+         * 
+         * @param string $data raw server input
+         * @return array|boolean array with all parameters or false on failure
+         */
+        private function getParameters( $data )
+        {
+            if ( preg_match( "/^:([^!]+)!([^\@]+)\@([^\s]+) .* ([^\s]+) \:(.*)$/U", $data, $return ) )
+            {
+                return array( "from" => $return[1], "fromUser" => $return[2], "fromHost" => $return[3], "to" => $return[4], "parameters" => $return[5] );
+            }
+            
+            return false;
         }
     }
 ?>

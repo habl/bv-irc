@@ -264,6 +264,35 @@
                 printf( "%s\n", $message );
             }
         }
+        
+        /**
+         * return the client nick
+         * 
+         * @return string|bool nickname on succes or false on fail
+         */
+        public function getNick()
+        {
+            if ( isset( $this->nick ) )
+            {
+                return $this->nick;
+            }
+            
+            return false;
+        }
+        
+        /**
+         * get raw received data
+         * @return string|bool data on succes or false on fail
+         */
+        public function getRaw()
+        {
+            if ( isset( $this->raw ) )
+            {
+                return $this->raw;
+            }
+            
+            return false;
+        }
        
     }
     
