@@ -1,5 +1,13 @@
 <?php
-    class IRC
+    require_once( dirname( __FILE__ ) . "/command.class.php" );
+    require_once( dirname( __FILE__ ) . "/event.class.php" );
+    
+    /**
+     * Main IRC class
+     *
+     * @author Hans Blaauw <info@habl.nl>
+     */
+    class IRC extends event
     {
         /**
          * Client nickname
@@ -63,12 +71,16 @@
         private $raw;
         
         /**
-         * class constructor
+         * event class
+         * @var object 
          */
-        public function __construct( )
-        {
-            
-        }
+        protected $event;
+        
+        /**
+         * command class
+         * @var object 
+         */
+        protected $command;
         
         /**
          * Set nickname of the client
@@ -179,7 +191,7 @@
             }
             else
             {
-                $this->events( $data );
+                $this->observe( $data );
             }
             
             // if we are still connecting continue monitoring the data
@@ -188,41 +200,7 @@
                 $this->main();
             }
         }
-        
-        /**
-         * The IRC events
-         * 
-         * @param array $data the incomming data
-         */
-        protected function events( $data )
-        {
-            if ( substr( $data[0], 0, 1 ) == ":" )
-            {
-                $from = substr( $data[0], 1 );
-                array_shift( $data );
-            }
-            
-            switch ( $data[0] )
-            {
-                // server ping
-                case "PING":
-                    $this->sendData( 'PONG', $data[1] );
-                    break;
-                case "PRIVMSG":
-                    // if channel onPublic, if nick onPrivate
-                    break;
-                case "JOIN":
-                    $this->runHandler( 'onJoin' );
-                    break;
-                case "NOTICE":
-                    // onnotice
-                    break;
-                // end of motd, usefull for onconnect
-                case "376":
-                    $this->runHandler( 'onConnect' );
-                    break;
-            }
-        }
+
         
         /**
          * Sent data to the IRC server
@@ -250,30 +228,6 @@
             }
             
             return false;
-        }
-        
-        /**
-         * running an event handler
-         * 
-         * @param string $handler the callback to run (if existing)
-         * 
-         * @TODO checking if the methods are callable
-         * @TODO maybe adding dynamic handlers? $this->registerHandler( 'event', 'callback' );
-         */
-        private function runHandler( $handler )
-        {
-            if ( method_exists( $this, $handler )  )
-            {
-                $this->$handler();
-            }
-            elseif ( function_exists( $handler ) )
-            {
-                $handler();
-            }
-            else
-            {
-                $this->debug( "! No method found for " . $handler );
-            }
         }
         
         /**
@@ -310,18 +264,7 @@
                 printf( "%s\n", $message );
             }
         }
-        
-        /**
-         * Join an IRC channel
-         * 
-         * @param string $channel
-         */
-        protected function joinChannel( $channel )
-        {
-            if ( substr( $channel, 0, 1 ) == "#" )
-            {
-                $this->sendData( 'JOIN', $channel );
-            }
-        }
+       
     }
+    
 ?>
