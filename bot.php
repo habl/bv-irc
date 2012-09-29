@@ -48,6 +48,7 @@
     $irc->setUser( "hablbot" );
     $irc->setRealName( "habl bot" );
     $irc->setDebug( true );
+    $irc->setAutoReconnect( true );
     
     $irc->connect();
 ?>

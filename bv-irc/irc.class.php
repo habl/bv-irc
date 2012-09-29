@@ -71,16 +71,17 @@
         private $raw;
         
         /**
-         * event class
-         * @var object 
+         * Auto reconnect on disconnect
+         * 
+         * @var bool 
          */
-        protected $event;
+        private $autoReconnect = false;
         
         /**
-         * command class
-         * @var object 
+         * Reconnecting delay
+         * @var int seconds
          */
-        protected $command;
+        private $delay;
         
         /**
          * Set nickname of the client
@@ -146,6 +147,22 @@
         }
         
         /**
+         * Turn on/off autoreconnect on disconnect
+         * 
+         * @param bool $val
+         * @param int $delay the time to wait with reconnecting in seconds
+         */
+        public function setAutoReconnect( $val, $delay = 10 )
+        {
+            if ( $val )
+                $this->autoReconnect = true;
+            else
+                $this->autoReconnect = false;
+            
+            $this->delay = $delay;
+        }
+        
+        /**
          * Connect to the IRC server and start listening to events
          */
         public function connect()
@@ -153,7 +170,7 @@
             $this->log( "Connecting to {$this->server}:{$this->port}" );
             
             // open the connection
-            $this->conn = fsockopen( $this->server, $this->port );
+            $this->conn = fsockopen( $this->server, $this->port, $errno, $errstr, 10 );
             
             if ( $this->conn )
             {
@@ -162,6 +179,30 @@
                 // start processing the data
                 $this->main();
             }
+        }
+        
+        /**
+         *  Reconnect to server
+         */
+        public function reconnect()
+        {
+            // disconnect first if still connected
+            if ( isset( $this->conn ) )
+            {
+                if ( ! feof( $this->conn ) )
+                    $this->sendData ( 'QUIT', 'Reconnecting' );
+                
+                unset( $conn );
+            }
+            
+            // reset some runtime variables
+            $this->loggedOn = false;
+            $this->serverName = "";
+            
+            sleep( $this->delay );
+            
+            // connect again
+            $this->connect();
         }
         
         /**
@@ -195,9 +236,20 @@
             }
             
             // if we are still connecting continue monitoring the data
-            if ( $this->conn )
+            if ( ! feof( $this->conn ) )
             {
                 $this->main();
+            }
+            else
+            {
+                // we are disconnected so remove the socket
+                unset( $this->conn );
+                
+                // reconnect if required
+                if ( $this->autoReconnect )
+                {
+                    $this->reconnect();
+                }
             }
         }
 
@@ -259,7 +311,7 @@
          */
         protected function debug( $message )
         {
-            if ( $this->debug )
+            if ( $this->debug && ! empty( $message ) )
             {
                 printf( "%s\n", $message );
             }
