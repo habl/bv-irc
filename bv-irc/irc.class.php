@@ -250,9 +250,26 @@
                 {
                     $this->reconnect();
                 }
+                else
+                {
+                    $this->log( "Disconnected from server." );
+                    
+                    exit;
+                }
             }
         }
 
+        /**
+         * Register user on the IRC server
+         */
+        protected function login( )
+        {
+            $this->sendData( 'USER', $this->nick, $this->nick . ' ' . $this->user . ' : '.$this->realName );
+         
+            $this->sendData( 'NICK', $this->nick );
+            
+            $this->loggedOn = true;
+        }
         
         /**
          * Sent data to the IRC server
@@ -282,24 +299,13 @@
             return false;
         }
         
-        /**
-         * Register user on the IRC server
-         */
-        protected function login( )
-        {
-            $this->sendData( 'USER', $this->nick, $this->nick . ' ' . $this->user . ' : '.$this->realName );
-         
-            $this->sendData( 'NICK', $this->nick );
-            
-            $this->loggedOn = true;
-        }
-        
+       
         /**
          * Log a message to the console
          * 
          * @param string $message
          */
-        protected function log( $message )
+        public function log( $message )
         {
             printf( "%s\n", $message );
         }
@@ -309,7 +315,7 @@
          * 
          * @param string $message
          */
-        protected function debug( $message )
+        public function debug( $message )
         {
             if ( $this->debug && ! empty( $message ) )
             {
