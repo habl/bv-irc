@@ -11,7 +11,7 @@
          * 
          * @var array 
          */
-        private $events = array();
+        private $_events = array();
         
         /**
          * The IRC events
@@ -39,13 +39,13 @@
                     // if destination isn't our nick it's a channel message
                     if ( $data[1] != $this->getNick() )
                     {
-                        if ( isset( $this->events['PUBLIC'] ) )
+                        if ( isset( $this->_events['PUBLIC'] ) )
                             $event = "PUBLIC";
                     }
                     // otherwise it's private
                     else
                     {
-                        if ( isset( $this->events['PRIVATE'] ) )
+                        if ( isset( $this->_events['PRIVATE'] ) )
                             $event = "PRIVATE";
                     }
                     break;
@@ -65,9 +65,9 @@
         {
             $params = $this->getParameters( $this->getRaw(), $curEvent );
             
-            if ( is_array( $this->events ) )
+            if ( is_array( $this->_events ) )
             {
-                foreach ( $this->events as $event => $callbacks )
+                foreach ( $this->_events as $event => $callbacks )
                 {
                     foreach ( $callbacks as $callback )
                     {
@@ -91,7 +91,7 @@
             // make it uppercase for the event checks
             $event = strtoupper( $event );
             
-            $this->events[$event][] = $callback;
+            $this->_events[$event][] = $callback;
         }
         
         /**
