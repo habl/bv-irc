@@ -49,13 +49,13 @@
          * The running socket
          * @var resource 
          */
-        private $conn;
+        private $_conn;
         
         /**
          * Debugging enabled
          * @var bool 
          */
-        private $debug = false;
+        private $_debug = false;
                 
         /**
          * Name of the server (not the host!)
@@ -98,9 +98,9 @@
             $this->log( "Connecting to {$this->_server}:{$this->_port}" );
             
             // open the connection
-            $this->conn = fsockopen( $this->_server, $this->_port, $errno, $errstr, 10 );
+            $this->_conn = fsockopen( $this->_server, $this->_port, $errno, $errstr, 10 );
             
-            if ( $this->conn )
+            if ( $this->_conn )
             {
                 $this->log( "Connected." );
                 
@@ -115,7 +115,7 @@
         protected function main()
         {
             // save incomming data and chop the leading white space
-            $this->_raw = chop( fgets( $this->conn ) );
+            $this->_raw = chop( fgets( $this->_conn ) );
             
             $this->debug( '<- ' . $this->_raw );
             
@@ -140,14 +140,14 @@
             }
             
             // if we are still connecting continue monitoring the data
-            if ( ! feof( $this->conn ) )
+            if ( ! feof( $this->_conn ) )
             {
                 $this->main();
             }
             else
             {
                 // we are disconnected so remove the socket
-                unset( $this->conn );
+                unset( $this->_conn );
                 
                 // reconnect if required
                 if ( $this->_autoReconnect )
@@ -185,7 +185,7 @@
          */
         protected function sendData( $cmd, $destination, $parameters = "" )
         {
-            if ( $this->conn && isset( $destination ) )
+            if ( $this->_conn && isset( $destination ) )
             {
                 // build an irc command
                 $serverString = $cmd . " " . $destination;
@@ -195,7 +195,7 @@
                     
                 $this->debug( '-> ' . $serverString );
                     
-                fwrite( $this->conn, $serverString . "\n" );
+                fwrite( $this->_conn, $serverString . "\n" );
                 
                 return true;
             }
@@ -211,9 +211,9 @@
         public function reconnect( $quitReason = "Reconnecting" )
         {
             // disconnect first if still connected
-            if ( isset( $this->conn ) )
+            if ( isset( $this->_conn ) )
             {
-                if ( ! feof( $this->conn ) )
+                if ( ! feof( $this->_conn ) )
                     $this->quitIrc( $quitReason );
                 
                 unset( $conn );
@@ -236,7 +236,7 @@
         {
             $this->log( "Closing connection and shutting down." );
             
-            fclose( $this->conn );
+            fclose( $this->_conn );
             exit;
         }
        
@@ -257,7 +257,7 @@
          */
         public function debug( $message )
         {
-            if ( $this->debug && ! empty( $message ) )
+            if ( $this->_debug && ! empty( $message ) )
             {
                 printf( "%s\n", $message );
             }
@@ -331,9 +331,9 @@
         public function setDebug( $val )
         {
             if ( $val )
-                $this->debug = true;
+                $this->_debug = true;
             else
-                $this->debug = false;
+                $this->_debug = false;
         }
         
         /**
@@ -385,6 +385,21 @@
             if ( isset( $this->_raw ) )
             {
                 return $this->_raw;
+            }
+            
+            return false;
+        }
+        
+        /**
+         * get the server name (not the host)
+         * 
+         * @return string|book servername on succes, false on fail
+         */
+        public function getServerName()
+        {
+            if ( isset( $this->_serverName ) )
+            {
+                return $this->_serverName;
             }
             
             return false;

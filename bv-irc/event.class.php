@@ -53,9 +53,12 @@
                  case "433":
                      $nick = $this->getNick();
                      
+                     // only run if there isn't an event handler registered
                      if ( ! isset( $this->_events['433'] ) )
                      {
                         $altNick = $this->getAltNick();
+                        
+                        // try alternative nick
                         if ( $altNick && $altNick != $this->getNick() )
                         {
                             $this->log( 'Nickname already in use, trying alternative nickname' );
@@ -63,6 +66,7 @@
 
                             $this->sendData( 'NICK', $altNick );
                         }
+                        // if the alternative is also in use disconnect
                         else
                         {
                             $this->log( "Alternative nick also in use" );
@@ -93,16 +97,19 @@
          */
         private function runDynamicHandlers( $curEvent )
         {
+            // get all parameters
             $params = $this->getParameters( $this->getRaw(), $curEvent );
             
             if ( is_array( $this->_events ) )
             {
+                // find if there is an event handler for the current event
                 foreach ( $this->_events as $event => $callbacks )
                 {
                     foreach ( $callbacks as $callback )
                     {
                         if ( $curEvent == $event )
                         {
+                            // run it!
                             $this->runHandler( $callback, $params );
                         }
                     }
@@ -132,21 +139,15 @@
          * 
          * @TODO checking if the methods are callable
          */
-        private function runHandler( $handler, $parameters = false )
+        private function runHandler( $handler, $parameters = array() )
         {
             if ( method_exists( $this, $handler )  )
             {
-                if ( $parameters )
-                    $this->$handler( $parameters );
-                else
-                    $this->$handler( );
+                $this->$handler( $parameters );
             }
             elseif ( function_exists( $handler ) )
             {
-                if ( $parameters )
-                    $handler( $parameters );
-                else
-                    $handler();
+                $handler( $parameters );
             }
             else
             {

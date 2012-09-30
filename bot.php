@@ -29,7 +29,41 @@
          */
         protected function onPublic( $parameters )
         {
-            print_r( $parameters );
+            $pieces = explode( ' ', $parameters['parameters'] );
+            
+            switch ( $pieces[0] )
+            {
+                case "!op":
+                    $this->op( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!deop":
+                    $this->deop( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!voice":
+                    $this->voice( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!dvoice":
+                    $this->dvoice( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!hop":
+                    $this->hop( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!dhop":
+                    $this->dhop( $parameters['destination'], $parameters['from'] );
+                    break;
+                case "!topic":
+                    array_shift( $pieces );
+                    
+                    $this->setTopic( $parameters['destination'], implode(" ", $pieces ) );
+                    break;
+                case "!notice":
+                    array_shift( $pieces );
+                    
+                    $this->sendNotice( $parameters['from'], implode(" ", $pieces ) );
+                    break;
+                
+            }
+            
             if ( $parameters['parameters'] == "hi" )
             {
                 $this->privmsg( $parameters['destination'], "hi!" );
@@ -46,8 +80,6 @@
          */
         protected function onMessage( $parameters )
         {
-            print_r( $parameters );
-            
             if ( $parameters['parameters'] == "hi" )
             {
                 $this->privmsg( $parameters['from'], "hi!" );
@@ -56,18 +88,16 @@
         
         protected function onNotice( $parameters )
         {
-            print_r( $parameters );
+            //print_r( $parameters );
         }
         
         protected function onMode( $parameters )
         {
-            print_r( $parameters );
+            //print_r( $parameters );
         }
         
         protected function onJoin( $parameters )
         {
-            print_r( $parameters );
-            
             if ( $parameters['from'] == $this->getNick() )
             {
                 $this->privmsg( $parameters['destination'], 'Woohoo I joined!' );
