@@ -13,31 +13,31 @@
          * Client nickname
          * @var string
          */
-        private $nick;
+        private $_nick;
         
         /**
          * Client username
          * @var string 
          */
-        private $user;
+        private $_user;
         
         /**
          * Client real name
          * @var string 
          */
-        private $realName;
+        private $_realName;
         
         /**
          * Server address
          * @var string 
          */
-        private $server;
+        private $_server;
         
         /**
          * Server port
          * @var int 
          */
-        private $port = 6667;
+        private $_port = 6667;
         
         /**
          * The running socket
@@ -56,32 +56,32 @@
          * 
          * @var string 
          */
-        private $serverName; 
+        private $_serverName; 
         
         /**
          * Are we logged on?
          * @var bool 
          */
-        private $loggedOn;
+        private $_loggedOn;
         
         /**
          * Received data from server
          * @var string 
          */
-        private $raw;
+        private $_raw;
         
         /**
          * Auto reconnect on disconnect
          * 
          * @var bool 
          */
-        private $autoReconnect = false;
+        private $_autoReconnect = false;
         
         /**
          * Reconnecting delay
          * @var int seconds
          */
-        private $delay;
+        private $_delay;
         
        
         /**
@@ -89,10 +89,10 @@
          */
         public function connect()
         {
-            $this->log( "Connecting to {$this->server}:{$this->port}" );
+            $this->log( "Connecting to {$this->_server}:{$this->_port}" );
             
             // open the connection
-            $this->conn = fsockopen( $this->server, $this->port, $errno, $errstr, 10 );
+            $this->conn = fsockopen( $this->_server, $this->_port, $errno, $errstr, 10 );
             
             if ( $this->conn )
             {
@@ -109,20 +109,20 @@
         protected function main()
         {
             // save incomming data and chop the leading white space
-            $this->raw = chop( fgets( $this->conn ) );
+            $this->_raw = chop( fgets( $this->conn ) );
             
-            $this->debug( '<- ' . $this->raw );
+            $this->debug( '<- ' . $this->_raw );
             
-            $data = explode( ' ', $this->raw );
+            $data = explode( ' ', $this->_raw );
             
             // first make sure we are connected and registered on the server
-            if ( ! $this->loggedOn )
+            if ( ! $this->_loggedOn )
             {
                 // if not logged on, wait with processing events till we can login
-                if ( strstr( $this->raw, "Found your hostname" ) )
+                if ( strstr( $this->_raw, "Found your hostname" ) )
                 {
                     // save the servername so we can use it to identify server notices
-                    $this->serverName = substr( $data[0], 1 );
+                    $this->_serverName = substr( $data[0], 1 );
                     
                     // start login
                     $this->login();
@@ -144,7 +144,7 @@
                 unset( $this->conn );
                 
                 // reconnect if required
-                if ( $this->autoReconnect )
+                if ( $this->_autoReconnect )
                 {
                     $this->reconnect();
                 }
@@ -162,11 +162,11 @@
          */
         protected function login( )
         {
-            $this->sendData( 'USER', $this->nick, $this->nick . ' ' . $this->user . ' : '.$this->realName );
+            $this->sendData( 'USER', $this->_nick, $this->_nick . ' ' . $this->_user . ' : ' . $this->_realName );
          
-            $this->sendData( 'NICK', $this->nick );
+            $this->sendData( 'NICK', $this->_nick );
             
-            $this->loggedOn = true;
+            $this->_loggedOn = true;
         }
         
         /**
@@ -214,10 +214,10 @@
             }
             
             // reset some runtime variables
-            $this->loggedOn = false;
-            $this->serverName = "";
+            $this->_loggedOn = false;
+            $this->_serverName = "";
             
-            sleep( $this->delay );
+            sleep( $this->_delay );
             
             // connect again
             $this->connect();
@@ -254,7 +254,7 @@
          */
         public function setNick( $nick )
         {
-            $this->nick = $nick;
+            $this->_nick = $nick;
         }
         
         /**
@@ -264,7 +264,7 @@
          */
         public function setUser( $user )
         {
-            $this->user = $user;
+            $this->_user = $user;
         }
         
         /**
@@ -274,7 +274,7 @@
          */
         public function setRealName( $realName )
         {
-            $this->realName = $realName;
+            $this->_realName = $realName;
         }
         
         /**
@@ -284,7 +284,7 @@
          */
         public function setServer( $server )
         {
-            $this->server = $server;
+            $this->_server = $server;
         }
         
         /**
@@ -294,7 +294,7 @@
          */
         public function setPort( $port )
         {
-            $this->port = $port;
+            $this->_port = $port;
         }
         
         /**
@@ -319,11 +319,11 @@
         public function setAutoReconnect( $val, $delay = 10 )
         {
             if ( $val )
-                $this->autoReconnect = true;
+                $this->_autoReconnect = true;
             else
-                $this->autoReconnect = false;
+                $this->_autoReconnect = false;
             
-            $this->delay = $delay;
+            $this->_delay = $delay;
         }
         /**
          * return the client nick
@@ -332,9 +332,9 @@
          */
         public function getNick()
         {
-            if ( isset( $this->nick ) )
+            if ( isset( $this->_nick ) )
             {
-                return $this->nick;
+                return $this->_nick;
             }
             
             return false;
@@ -346,9 +346,9 @@
          */
         public function getRaw()
         {
-            if ( isset( $this->raw ) )
+            if ( isset( $this->_raw ) )
             {
-                return $this->raw;
+                return $this->_raw;
             }
             
             return false;

@@ -8,8 +8,10 @@
             // register onConnect on numeric event 004 (end of motd)
             $this->registerEvent( '004', 'onConnect' );
             $this->registerEvent( 'public', 'onPublic' );
-            $this->registerEvent( 'private', 'onPrivate' );
-            //$this->registerEvent( 'JOIN', 'onJoin' );
+            $this->registerEvent( 'private', 'onMessage' );
+            $this->registerEvent( 'JOIN', 'onJoin' );
+            $this->registerEvent( 'NOTICE', 'onNotice');
+            $this->registerEvent( 'MODE', 'onMode');
         }
         
         /**
@@ -27,9 +29,10 @@
          */
         protected function onPublic( $parameters )
         {
+            print_r( $parameters );
             if ( $parameters['parameters'] == "hi" )
             {
-                $this->privmsg( $parameters['to'], "hi!" );
+                $this->privmsg( $parameters['destination'], "hi!" );
             }
             
             if ( $parameters['parameters'] == "!reconnect" )
@@ -43,9 +46,31 @@
          */
         protected function onMessage( $parameters )
         {
+            print_r( $parameters );
+            
             if ( $parameters['parameters'] == "hi" )
             {
                 $this->privmsg( $parameters['from'], "hi!" );
+            }
+        }
+        
+        protected function onNotice( $parameters )
+        {
+            print_r( $parameters );
+        }
+        
+        protected function onMode( $parameters )
+        {
+            print_r( $parameters );
+        }
+        
+        protected function onJoin( $parameters )
+        {
+            print_r( $parameters );
+            
+            if ( $parameters['from'] == $this->getNick() )
+            {
+                $this->privmsg( $parameters['destination'], 'Woohoo I joined!' );
             }
         }
     }

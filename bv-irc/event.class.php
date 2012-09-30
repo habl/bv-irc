@@ -49,9 +49,8 @@
                             $event = "PRIVATE";
                     }
                     break;
-                case "NOTICE":
-                    // onnotice
-                    break;
+                 // 433 nickname already in use
+
             }
             
             $this->runDynamicHandlers( $event );
@@ -64,7 +63,7 @@
          */
         private function runDynamicHandlers( $curEvent )
         {
-            $params = $this->getParameters( $this->getRaw() );
+            $params = $this->getParameters( $this->getRaw(), $curEvent );
             
             if ( is_array( $this->events ) )
             {
@@ -129,13 +128,40 @@
          * format the raw data so it's more usable
          * 
          * @param string $data raw server input
+         * @param string $event the current event
          * @return array|boolean array with all parameters or false on failure
          */
-        private function getParameters( $data )
+        private function getParameters( $data, $event )
         {
-            if ( preg_match( "/^:([^!]+)!([^\@]+)\@([^\s]+) .* ([^\s]+) \:(.*)$/U", $data, $return ) )
+            $params = array();
+            
+            // fetch all useful information of the server input
+            if ( preg_match( "/^:([^\s]+) .*[\s]?([^\s]*)[\s]?\:(.*)$/U", $data, $return ) )
             {
-                return array( "from" => $return[1], "fromUser" => $return[2], "fromHost" => $return[3], "to" => $return[4], "parameters" => $return[5] );
+                // fetch nickname, username and host if any
+                if ( preg_match( "/^([^!]+)!([^\@]+)\@([^\s]+)$/U", $return[1], $returnFrom ) )
+                {
+                    $params['from'] = $returnFrom[1];
+                    $params['fromUser'] = $returnFrom[2];
+                    $params['fromHost'] = $returnFrom[3];
+                }
+                // and if not just save the complete line as from (in case it's us)
+                else
+                {
+                    $params['from'] = $return[1];
+                }
+                
+                if ( $return[2] != $event )
+                {
+                    $params['destination'] = $return[2];
+                    $params['parameters'] = $return[3];
+                }
+                else
+                {
+                    $params['destination'] = $return[3];
+                }
+                //
+                return $params;
             }
             else
             {
