@@ -49,11 +49,41 @@
                             $event = "PRIVATE";
                     }
                     break;
-                 // 433 nickname already in use
+                 // nickname already in use
+                 case "433":
+                     $nick = $this->getNick();
+                     
+                     if ( ! isset( $this->_events['433'] ) )
+                     {
+                        $altNick = $this->getAltNick();
+                        if ( $altNick && $altNick != $this->getNick() )
+                        {
+                            $this->log( 'Nickname already in use, trying alternative nickname' );
+                            $this->setNick( $altNick );
+
+                            $this->sendData( 'NICK', $altNick );
+                        }
+                        else
+                        {
+                            $this->log( "Alternative nick also in use" );
+                            $this->disconnect();
+                        }
+                     }
+                     break;
 
             }
             
             $this->runDynamicHandlers( $event );
+            
+            // check if an event handler changed our nick
+            if ( isset( $this->_events['433'] ) && $event == "433" )
+            {
+                // if not the event handler failed and we should disconnect
+                if ( $this->getNick() == $botnick )
+                {
+                    $this->disconnect();
+                }
+            }
         }
         
         /**

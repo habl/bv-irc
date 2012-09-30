@@ -29,9 +29,21 @@
          * 
          * @param string $reason quit reason
          */
-        public function disconnect( $reason )
+        public function quitIrc( $reason )
         {
-            $this->sendData ( 'QUIT', $reason );
+            $this->sendData( 'QUIT', $reason );
+        }
+        
+        /**
+         * Change our nickname
+         * 
+         * @param string $nick
+         */
+        public function changeNick( $nick )
+        {
+            $this->setNick( $nick );
+            
+            $this->sendData( 'NICK', $nick );
         }
     }
 ?>

@@ -73,17 +73,21 @@
                 $this->privmsg( $parameters['destination'], 'Woohoo I joined!' );
             }
         }
+
     }
     
     $irc = new bot();
     
     $irc->setServer( "irc.bitvortex.net" );
     $irc->setPort( 6667 );
+    $irc->setAutoReconnect( true );
+    
     $irc->setNick( "hablbot" );
+    $irc->setAltNick( "hablbot-" );
     $irc->setUser( "hablbot" );
     $irc->setRealName( "habl bot" );
+    
     $irc->setDebug( true );
-    $irc->setAutoReconnect( true );
     
     $irc->connect();
 ?>

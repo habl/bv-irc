@@ -16,6 +16,12 @@
         private $_nick;
         
         /**
+         * Alternative nickname
+         * @var string 
+         */
+        private $_altNick;
+        
+        /**
          * Client username
          * @var string 
          */
@@ -208,7 +214,7 @@
             if ( isset( $this->conn ) )
             {
                 if ( ! feof( $this->conn ) )
-                    $this->disconnect( $quitReason );
+                    $this->quitIrc( $quitReason );
                 
                 unset( $conn );
             }
@@ -223,6 +229,16 @@
             $this->connect();
         }
         
+        /**
+         * Disconnect bot and shutdown script
+         */
+        protected function disconnect()
+        {
+            $this->log( "Closing connection and shutting down." );
+            
+            fclose( $this->conn );
+            exit;
+        }
        
         /**
          * Log a message to the console
@@ -255,6 +271,16 @@
         public function setNick( $nick )
         {
             $this->_nick = $nick;
+        }
+        
+        /**
+         * Sets the alternative nickname
+         * 
+         * @param string $nick
+         */
+        public function setAltNick( $nick )
+        {
+            $this->_altNick = $nick;
         }
         
         /**
@@ -335,6 +361,16 @@
             if ( isset( $this->_nick ) )
             {
                 return $this->_nick;
+            }
+            
+            return false;
+        }
+        
+        public function getAltNick()
+        {
+            if ( isset( $this->_altNick ) )
+            {
+                return $this->_altNick;
             }
             
             return false;
