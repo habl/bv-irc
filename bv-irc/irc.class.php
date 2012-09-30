@@ -83,85 +83,7 @@
          */
         private $delay;
         
-        /**
-         * Set nickname of the client
-         * 
-         * @param string $nick
-         */
-        public function setNick( $nick )
-        {
-            $this->nick = $nick;
-        }
-        
-        /**
-         * Set username of the client
-         * 
-         * @param string $user
-         */
-        public function setUser( $user )
-        {
-            $this->user = $user;
-        }
-        
-        /**
-         * Set real name of the client
-         * 
-         * @param string $realName
-         */
-        public function setRealName( $realName )
-        {
-            $this->realName = $realName;
-        }
-        
-        /**
-         * Set the IRC server to connect to
-         * 
-         * @param string $server
-         */
-        public function setServer( $server )
-        {
-            $this->server = $server;
-        }
-        
-        /**
-         * Set the IRC server port
-         * 
-         * @param int $port
-         */
-        public function setPort( $port )
-        {
-            $this->port = $port;
-        }
-        
-        /**
-         * Turn on debugging
-         * 
-         * @param bool $val
-         */
-        public function setDebug( $val )
-        {
-            if ( $val )
-                $this->debug = true;
-            else
-                $this->debug = false;
-        }
-        
-        /**
-         * Turn on/off autoreconnect on disconnect
-         * 
-         * @param bool $val
-         * @param int $delay the time to wait with reconnecting in seconds
-         */
-        public function setAutoReconnect( $val, $delay = 10 )
-        {
-            if ( $val )
-                $this->autoReconnect = true;
-            else
-                $this->autoReconnect = false;
-            
-            $this->delay = $delay;
-        }
-        
+       
         /**
          * Connect to the IRC server and start listening to events
          */
@@ -179,30 +101,6 @@
                 // start processing the data
                 $this->main();
             }
-        }
-        
-        /**
-         *  Reconnect to server
-         */
-        public function reconnect()
-        {
-            // disconnect first if still connected
-            if ( isset( $this->conn ) )
-            {
-                if ( ! feof( $this->conn ) )
-                    $this->sendData ( 'QUIT', 'Reconnecting' );
-                
-                unset( $conn );
-            }
-            
-            // reset some runtime variables
-            $this->loggedOn = false;
-            $this->serverName = "";
-            
-            sleep( $this->delay );
-            
-            // connect again
-            $this->connect();
         }
         
         /**
@@ -299,6 +197,32 @@
             return false;
         }
         
+        /**
+         *  Reconnect to server
+         *  
+         *  @param string $quitReason
+         */
+        public function reconnect( $quitReason = "Reconnecting" )
+        {
+            // disconnect first if still connected
+            if ( isset( $this->conn ) )
+            {
+                if ( ! feof( $this->conn ) )
+                    $this->disconnect( $quitReason );
+                
+                unset( $conn );
+            }
+            
+            // reset some runtime variables
+            $this->loggedOn = false;
+            $this->serverName = "";
+            
+            sleep( $this->delay );
+            
+            // connect again
+            $this->connect();
+        }
+        
        
         /**
          * Log a message to the console
@@ -323,6 +247,84 @@
             }
         }
         
+        /**
+         * Set nickname of the client
+         * 
+         * @param string $nick
+         */
+        public function setNick( $nick )
+        {
+            $this->nick = $nick;
+        }
+        
+        /**
+         * Set username of the client
+         * 
+         * @param string $user
+         */
+        public function setUser( $user )
+        {
+            $this->user = $user;
+        }
+        
+        /**
+         * Set real name of the client
+         * 
+         * @param string $realName
+         */
+        public function setRealName( $realName )
+        {
+            $this->realName = $realName;
+        }
+        
+        /**
+         * Set the IRC server to connect to
+         * 
+         * @param string $server
+         */
+        public function setServer( $server )
+        {
+            $this->server = $server;
+        }
+        
+        /**
+         * Set the IRC server port
+         * 
+         * @param int $port
+         */
+        public function setPort( $port )
+        {
+            $this->port = $port;
+        }
+        
+        /**
+         * Turn on debugging
+         * 
+         * @param bool $val
+         */
+        public function setDebug( $val )
+        {
+            if ( $val )
+                $this->debug = true;
+            else
+                $this->debug = false;
+        }
+        
+        /**
+         * Turn on/off autoreconnect on disconnect
+         * 
+         * @param bool $val
+         * @param int $delay the time to wait with reconnecting in seconds
+         */
+        public function setAutoReconnect( $val, $delay = 10 )
+        {
+            if ( $val )
+                $this->autoReconnect = true;
+            else
+                $this->autoReconnect = false;
+            
+            $this->delay = $delay;
+        }
         /**
          * return the client nick
          * 

@@ -23,5 +23,15 @@
         {
             $this->sendData( 'PRIVMSG', $to, $message );
         }
+        
+        /**
+         * Sents disconnect command to server
+         * 
+         * @param string $reason quit reason
+         */
+        public function disconnect( $reason )
+        {
+            $this->sendData ( 'QUIT', $reason );
+        }
     }
 ?>
