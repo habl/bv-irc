@@ -7,6 +7,9 @@
         {
             // register onConnect on numeric event 004 (end of motd)
             $this->registerEvent( '004', 'onConnect' );
+            $this->registerEvent( 'public', 'onPublic' );
+            $this->registerEvent( 'private', 'onPrivate' );
+            //$this->registerEvent( 'JOIN', 'onJoin' );
         }
         
         /**

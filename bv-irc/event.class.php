@@ -26,35 +26,35 @@
                 array_shift( $data );
             }
 
-            $params = $this->getParameters( $this->getRaw() );
+            $event = strtoupper( $data[0] );
             
-            switch ( $data[0] )
+            switch ( $event )
             {
-                // server ping
+                // server ping should always being observed to prevent a connection timeout
                 case "PING":
                     $this->sendData( 'PONG', $data[1] );
                     break;
+                // privmsg got more event types, public and private, check which handler should be runned
                 case "PRIVMSG":
-                    
+                    // if destination isn't our nick it's a channel message
                     if ( $data[1] != $this->getNick() )
                     {
-                        $this->runHandler( 'onPublic', $params );
+                        if ( isset( $this->events['PUBLIC'] ) )
+                            $event = "PUBLIC";
                     }
+                    // otherwise it's private
                     else
                     {
-                        $this->runHandler( 'onMessage', $params );
+                        if ( isset( $this->events['PRIVATE'] ) )
+                            $event = "PRIVATE";
                     }
-                    // if channel onPublic, if nick onPrivate
-                    break;
-                case "JOIN":
-                    $this->runHandler( 'onJoin' );
                     break;
                 case "NOTICE":
                     // onnotice
                     break;
             }
             
-            $this->runDynamicHandlers( $data[0] );
+            $this->runDynamicHandlers( $event );
         }
         
         /**
@@ -64,6 +64,8 @@
          */
         private function runDynamicHandlers( $curEvent )
         {
+            $params = $this->getParameters( $this->getRaw() );
+            
             if ( is_array( $this->events ) )
             {
                 foreach ( $this->events as $event => $callbacks )
@@ -87,6 +89,9 @@
          */
         public function registerEvent( $event, $callback )
         {
+            // make it uppercase for the event checks
+            $event = strtoupper( $event );
+            
             $this->events[$event][] = $callback;
         }
         
@@ -116,7 +121,7 @@
             }
             else
             {
-                $this->debug( "! No method found for " . $handler );
+                $this->debug( "! Method not found: " . $handler );
             }
         }
         
