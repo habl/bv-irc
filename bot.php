@@ -5,6 +5,8 @@
     {
         public function __construct()
         {
+            // register onConnect on numeric event 004 (end of motd)
+            $this->registerEvent( '004', 'onConnect' );
         }
         
         /**
@@ -25,6 +27,11 @@
             if ( $parameters['parameters'] == "hi" )
             {
                 $this->privmsg( $parameters['to'], "hi!" );
+            }
+            
+            if ( $parameters['parameters'] == "!reconnect" )
+            {
+                $this->reconnect( "Reconnect requested by " . $parameters['from'] );
             }
         }
         

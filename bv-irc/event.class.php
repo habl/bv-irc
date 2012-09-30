@@ -7,6 +7,13 @@
     class event extends command
     {
         /**
+         * array with all events which are being observed
+         * 
+         * @var array 
+         */
+        private $events = array();
+        
+        /**
          * The IRC events
          * 
          * @param array $data the incomming data
@@ -18,6 +25,8 @@
                 $from = substr( $data[0], 1 );
                 array_shift( $data );
             }
+
+            $params = $this->getParameters( $this->getRaw() );
             
             switch ( $data[0] )
             {
@@ -26,7 +35,6 @@
                     $this->sendData( 'PONG', $data[1] );
                     break;
                 case "PRIVMSG":
-                    $params = $this->getParameters( $this->getRaw() );
                     
                     if ( $data[1] != $this->getNick() )
                     {
@@ -44,11 +52,42 @@
                 case "NOTICE":
                     // onnotice
                     break;
-                // end of motd, usefull for onconnect
-                case "004":
-                    $this->runHandler( 'onConnect' );
-                    break;
             }
+            
+            $this->runDynamicHandlers( $data[0] );
+        }
+        
+        /**
+         * Run all dynamically registered event handlers
+         * 
+         * @param string $curEvent the current event
+         */
+        private function runDynamicHandlers( $curEvent )
+        {
+            if ( is_array( $this->events ) )
+            {
+                foreach ( $this->events as $event => $callbacks )
+                {
+                    foreach ( $callbacks as $callback )
+                    {
+                        if ( $curEvent == $event )
+                        {
+                            $this->runHandler( $callback, $params );
+                        }
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Register an event handler
+         * 
+         * @param type $event
+         * @param type $callback
+         */
+        public function registerEvent( $event, $callback )
+        {
+            $this->events[$event][] = $callback;
         }
         
         /**
@@ -58,7 +97,6 @@
          * @param array $parameters
          * 
          * @TODO checking if the methods are callable
-         * @TODO maybe adding dynamic handlers? $this->registerHandler( 'event', 'callback' );
          */
         private function runHandler( $handler, $parameters = false )
         {
@@ -94,8 +132,10 @@
             {
                 return array( "from" => $return[1], "fromUser" => $return[2], "fromHost" => $return[3], "to" => $return[4], "parameters" => $return[5] );
             }
-            
-            return false;
+            else
+            {
+                return array();
+            }
         }
     }
 ?>
