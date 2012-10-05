@@ -66,7 +66,7 @@
             
             if ( $parameters['parameters'] == "hi" )
             {
-                $this->privmsg( $parameters['destination'], "hi!" );
+                $this->privmsg( $parameters['destination'], "hi!\nhi again!" );
             }
             
             if ( $parameters['parameters'] == "!reconnect" )

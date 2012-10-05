@@ -19,9 +19,20 @@
             }
         }
         
+        /**
+         * Send irc messages to a destination. Supports multilines
+         * 
+         * @param string $to
+         * @param string $message
+         */
         public function privmsg( $to, $message )
         {
-            $this->sendData( 'PRIVMSG', $to, ':' . $message );
+            $messages = explode( "\n", $message );
+            
+            foreach ( $messages as $message )
+            {
+                $this->sendData( 'PRIVMSG', $to, ':' . $message );
+            }
         }
         
         /**
